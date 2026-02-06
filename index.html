@@ -1,38 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8"/>
-    <title>CBDC Status – Interactive Choropleth Map</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <script src="https://cdn.plot.ly/plotly-2.4.1.min.js"></script>
-
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #ffffff;
-        }
-        #cbdc-map {
-            width: 100vw;
-            height: 95vh;
-        }
-        footer {
-            text-align: center;
-            font-size: 12px;
-            color: #555;
-            padding: 6px;
-        }
-    </style>
-</head>
-
-<body>
-
-<div id="cbdc-map"></div>
-
-<footer>
-    Source: own elaboration based on official central bank publications.
-</footer>
-
 <script>
 
 /* =========================
@@ -69,7 +34,7 @@ var data = [
     hovertemplate: "<b>%{text}</b><br>Status: Pilot<extra></extra>"
 },
 
-/* Development – Euro area (Digital Euro) + others */
+/* Development */
 {
     type: "choropleth",
     locationmode: "ISO-3",
@@ -105,7 +70,7 @@ var data = [
     hovertemplate: "<b>%{text}</b><br>Status: Design Phase<extra></extra>"
 },
 
-/* Research / Exploratory */
+/* Research */
 {
     type: "choropleth",
     locationmode: "ISO-3",
@@ -131,12 +96,59 @@ var data = [
     showscale: false,
     marker: {line:{color:"white",width:0.4}},
     hovertemplate: "<b>%{text}</b><br>Status: Cancelled<extra></extra>"
+},
+
+/* =========================
+   TRACES PARA LEYENDA
+   ========================= */
+
+{
+    type: "scatter",
+    mode: "markers",
+    x: [null], y: [null],
+    name: "Publicly launched",
+    marker: {color:"#2F855A", size:12}
+},
+{
+    type: "scatter",
+    mode: "markers",
+    x: [null], y: [null],
+    name: "Pilot",
+    marker: {color:"#D69E2E", size:12}
+},
+{
+    type: "scatter",
+    mode: "markers",
+    x: [null], y: [null],
+    name: "Development",
+    marker: {color:"#2B6CB0", size:12}
+},
+{
+    type: "scatter",
+    mode: "markers",
+    x: [null], y: [null],
+    name: "Design Phase",
+    marker: {color:"#6A5ACD", size:12}
+},
+{
+    type: "scatter",
+    mode: "markers",
+    x: [null], y: [null],
+    name: "Research / Exploratory",
+    marker: {color:"#9B2C2C", size:12}
+},
+{
+    type: "scatter",
+    mode: "markers",
+    x: [null], y: [null],
+    name: "Cancelled",
+    marker: {color:"#7A7A7A", size:12}
 }
 
 ];
 
 /* =========================
-   LAYOUT (LEYENDA FIJA)
+   LAYOUT
    ========================= */
 
 var layout = {
@@ -172,6 +184,3 @@ var layout = {
 Plotly.newPlot("cbdc-map", data, layout, {responsive:true});
 
 </script>
-
-</body>
-</html>
