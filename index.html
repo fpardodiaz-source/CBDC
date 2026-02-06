@@ -1,12 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>CBDC Status – Interactive Choropleth Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- Plotly actualizado -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #ffffff;
+        }
+        #cbdc-map {
+            width: 100vw;
+            height: 95vh;
+        }
+        footer {
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+            padding: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="cbdc-map"></div>
+
+<footer>
+    Source: own elaboration based on official central bank publications.
+</footer>
+
 <script>
 
 /* =========================
-   DATA
+   MAPA CHOROPLETH
    ========================= */
 
-var data = [
+var mapTraces = [
 
-/* Publicly launched */
 {
     type: "choropleth",
     locationmode: "ISO-3",
@@ -16,11 +52,9 @@ var data = [
     name: "Publicly launched",
     colorscale: [[0,"#2F855A"],[1,"#2F855A"]],
     showscale: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Publicly launched<extra></extra>"
+    marker: {line:{color:"white",width:0.4}}
 },
 
-/* Pilot */
 {
     type: "choropleth",
     locationmode: "ISO-3",
@@ -30,11 +64,9 @@ var data = [
     name: "Pilot",
     colorscale: [[0,"#D69E2E"],[1,"#D69E2E"]],
     showscale: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Pilot<extra></extra>"
+    marker: {line:{color:"white",width:0.4}}
 },
 
-/* Development */
 {
     type: "choropleth",
     locationmode: "ISO-3",
@@ -52,11 +84,9 @@ var data = [
     name: "Development",
     colorscale: [[0,"#2B6CB0"],[1,"#2B6CB0"]],
     showscale: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Development<extra></extra>"
+    marker: {line:{color:"white",width:0.4}}
 },
 
-/* Design phase */
 {
     type: "choropleth",
     locationmode: "ISO-3",
@@ -66,11 +96,9 @@ var data = [
     name: "Design Phase",
     colorscale: [[0,"#6A5ACD"],[1,"#6A5ACD"]],
     showscale: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Design Phase<extra></extra>"
+    marker: {line:{color:"white",width:0.4}}
 },
 
-/* Research */
 {
     type: "choropleth",
     locationmode: "ISO-3",
@@ -80,11 +108,9 @@ var data = [
     name: "Research / Exploratory",
     colorscale: [[0,"#9B2C2C"],[1,"#9B2C2C"]],
     showscale: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Research / Exploratory<extra></extra>"
+    marker: {line:{color:"white",width:0.4}}
 },
 
-/* Cancelled */
 {
     type: "choropleth",
     locationmode: "ISO-3",
@@ -94,55 +120,70 @@ var data = [
     name: "Cancelled",
     colorscale: [[0,"#7A7A7A"],[1,"#7A7A7A"]],
     showscale: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Cancelled<extra></extra>"
-},
+    marker: {line:{color:"white",width:0.4}}
+}
+
+];
 
 /* =========================
    TRACES PARA LEYENDA
    ========================= */
 
+var legendTraces = [
+
 {
     type: "scatter",
     mode: "markers",
-    x: [null], y: [null],
+    x: [0], y: [0],
     name: "Publicly launched",
-    marker: {color:"#2F855A", size:12}
+    marker: {color:"#2F855A", size:12},
+    showlegend: true,
+    hoverinfo: "skip"
 },
 {
     type: "scatter",
     mode: "markers",
-    x: [null], y: [null],
+    x: [0], y: [0],
     name: "Pilot",
-    marker: {color:"#D69E2E", size:12}
+    marker: {color:"#D69E2E", size:12},
+    showlegend: true,
+    hoverinfo: "skip"
 },
 {
     type: "scatter",
     mode: "markers",
-    x: [null], y: [null],
+    x: [0], y: [0],
     name: "Development",
-    marker: {color:"#2B6CB0", size:12}
+    marker: {color:"#2B6CB0", size:12},
+    showlegend: true,
+    hoverinfo: "skip"
 },
 {
     type: "scatter",
     mode: "markers",
-    x: [null], y: [null],
+    x: [0], y: [0],
     name: "Design Phase",
-    marker: {color:"#6A5ACD", size:12}
+    marker: {color:"#6A5ACD", size:12},
+    showlegend: true,
+    hoverinfo: "skip"
 },
 {
     type: "scatter",
     mode: "markers",
-    x: [null], y: [null],
+    x: [0], y: [0],
     name: "Research / Exploratory",
-    marker: {color:"#9B2C2C", size:12}
+    marker: {color:"#9B2C2C", size:12},
+    showlegend: true,
+    hoverinfo: "skip"
 },
 {
     type: "scatter",
     mode: "markers",
-    x: [null], y: [null],
+    x: [0], y: [0],
     name: "Cancelled",
-    marker: {color:"#7A7A7A", size:12}
+    marker: {color:"#7A7A7A", size:12},
+    showlegend: true,
+    hoverinfo: "skip"
 }
 
 ];
@@ -167,9 +208,9 @@ var layout = {
         bgcolor: "white"
     },
 
-    /* 👇 ESTO ES LO QUE FALTABA 👇 */
-
-
+    /* Ejes invisibles para permitir leyenda */
+    xaxis: {visible: false, range: [-1, 1]},
+    yaxis: {visible: false, range: [-1, 1]},
 
     legend: {
         title: {text: "Status"},
@@ -182,11 +223,18 @@ var layout = {
         bordercolor: "rgba(0,0,0,0.2)",
         borderwidth: 1
     },
+
     margin: {l:10,r:10,t:60,b:10},
     paper_bgcolor: "white"
 };
 
+/* =========================
+   PLOT
+   ========================= */
 
-Plotly.newPlot("cbdc-map", data, layout, {responsive:true});
+Plotly.newPlot("cbdc-map", [...mapTraces, ...legendTraces], layout, {responsive:true});
 
 </script>
+
+</body>
+</html>
