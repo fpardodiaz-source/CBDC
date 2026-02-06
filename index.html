@@ -166,6 +166,11 @@ var layout = {
         coastlinecolor: "rgba(0,0,0,0.25)",
         bgcolor: "white"
     },
+
+    /* 👇 ESTO ES LO QUE FALTABA 👇 */
+    xaxis: {visible: false},
+    yaxis: {visible: false},
+
     legend: {
         title: {text: "Status"},
         orientation: "v",
@@ -180,6 +185,7 @@ var layout = {
     margin: {l:10,r:10,t:60,b:10},
     paper_bgcolor: "white"
 };
+
 
 Plotly.newPlot("cbdc-map", data, layout, {responsive:true});
 
