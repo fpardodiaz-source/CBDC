@@ -4,8 +4,6 @@
     <meta charset="utf-8"/>
     <title>CBDC Status – Interactive Choropleth Map</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-    <!-- Plotly CDN (official) -->
     <script src="https://cdn.plot.ly/plotly-2.4.1.min.js"></script>
 
     <style>
@@ -22,7 +20,7 @@
             text-align: center;
             font-size: 12px;
             color: #555;
-            padding: 6px 10px;
+            padding: 6px;
         }
     </style>
 </head>
@@ -32,122 +30,119 @@
 <div id="cbdc-map"></div>
 
 <footer>
-    Interactive CBDC status map. Source: own elaboration based on official central bank publications.
+    Source: own elaboration based on official central bank publications.
 </footer>
 
-<script type="text/javascript">
+<script>
 
-/* ======================================================
-   DATA: CBDC STATUS BY COUNTRY (ISO-3)
-   ====================================================== */
+/* =========================
+   DATA
+   ========================= */
 
 var data = [
 
-    /* ---------------- Publicly launched ---------------- */
-    {
-        type: "choropleth",
-        locationmode: "ISO-3",
-        locations: ["BHS", "JAM", "NGA"],
-        z: [1,1,1],
-        text: ["Bahamas", "Jamaica", "Nigeria"],
-        name: "Publicly launched",
-        colorscale: [[0,"#2F855A"],[1,"#2F855A"]],
-        showscale: false,
-        marker: {line: {color: "white", width: 0.4}},
-        hovertemplate: "<b>%{text}</b><br>Status: Publicly launched<extra></extra>"
-    },
+/* Publicly launched */
+{
+    type: "choropleth",
+    locationmode: "ISO-3",
+    locations: ["BHS","JAM","NGA"],
+    z: [1,1,1],
+    text: ["Bahamas","Jamaica","Nigeria"],
+    name: "Publicly launched",
+    colorscale: [[0,"#2F855A"],[1,"#2F855A"]],
+    showscale: false,
+    marker: {line:{color:"white",width:0.4}},
+    hovertemplate: "<b>%{text}</b><br>Status: Publicly launched<extra></extra>"
+},
 
-    /* ---------------- Pilot ---------------- */
-    {
-        type: "choropleth",
-        locationmode: "ISO-3",
-        locations: [
-            "AUS","BRA","CHN","GHA","HKG","IND","KAZ",
-            "RUS","SWE","TUR"
-        ],
-        z: Array(10).fill(1),
-        text: [
-            "Australia","Brazil","China","Ghana","Hong Kong",
-            "India","Kazakhstan","Russia","Sweden","Türkiye"
-        ],
-        name: "Pilot",
-        colorscale: [[0,"#D69E2E"],[1,"#D69E2E"]],
-        showscale: false,
-        marker: {line: {color: "white", width: 0.4}},
-        hovertemplate: "<b>%{text}</b><br>Status: Pilot<extra></extra>"
-    },
+/* Pilot */
+{
+    type: "choropleth",
+    locationmode: "ISO-3",
+    locations: ["AUS","BRA","CHN","GHA","HKG","IND","KAZ","RUS","SWE","TUR"],
+    z: Array(10).fill(1),
+    text: ["Australia","Brazil","China","Ghana","Hong Kong","India","Kazakhstan","Russia","Sweden","Türkiye"],
+    name: "Pilot",
+    colorscale: [[0,"#D69E2E"],[1,"#D69E2E"]],
+    showscale: false,
+    marker: {line:{color:"white",width:0.4}},
+    hovertemplate: "<b>%{text}</b><br>Status: Pilot<extra></extra>"
+},
 
-    /* ---------------- Development (Euro area + others) ---------------- */
-    {
-        type: "choropleth",
-        locationmode: "ISO-3",
-        locations: [
-            "AUT","BEL","DEU","ESP","FRA","ITA","NLD","CAN","ARE"
-        ],
-        z: Array(9).fill(1),
-        text: [
-            "Austria","Belgium","Germany","Spain","France",
-            "Italy","Netherlands","Canada","United Arab Emirates"
-        ],
-        name: "Development",
-        colorscale: [[0,"#2B6CB0"],[1,"#2B6CB0"]],
-        showscale: false,
-        marker: {line: {color: "white", width: 0.4}},
-        hovertemplate: "<b>%{text}</b><br>Status: Development<extra></extra>"
-    },
+/* Development – Euro area (Digital Euro) + others */
+{
+    type: "choropleth",
+    locationmode: "ISO-3",
+    locations: [
+        "AUT","BEL","HRV","CYP","EST","FIN","FRA","DEU","GRC","IRL",
+        "ITA","LVA","LTU","LUX","MLT","NLD","PRT","SVK","SVN","ESP",
+        "CAN","ARE"
+    ],
+    z: Array(22).fill(1),
+    text: [
+        "Austria","Belgium","Croatia","Cyprus","Estonia","Finland","France","Germany","Greece","Ireland",
+        "Italy","Latvia","Lithuania","Luxembourg","Malta","Netherlands","Portugal","Slovakia","Slovenia","Spain",
+        "Canada","United Arab Emirates"
+    ],
+    name: "Development",
+    colorscale: [[0,"#2B6CB0"],[1,"#2B6CB0"]],
+    showscale: false,
+    marker: {line:{color:"white",width:0.4}},
+    hovertemplate: "<b>%{text}</b><br>Status: Development<extra></extra>"
+},
 
-    /* ---------------- Design Phase ---------------- */
-    {
-        type: "choropleth",
-        locationmode: "ISO-3",
-        locations: ["GBR"],
-        z: [1],
-        text: ["United Kingdom"],
-        name: "Design Phase",
-        colorscale: [[0,"#6A5ACD"],[1,"#6A5ACD"]],
-        showscale: false,
-        marker: {line: {color: "white", width: 0.4}},
-        hovertemplate: "<b>%{text}</b><br>Status: Design Phase<extra></extra>"
-    },
+/* Design phase */
+{
+    type: "choropleth",
+    locationmode: "ISO-3",
+    locations: ["GBR"],
+    z: [1],
+    text: ["United Kingdom"],
+    name: "Design Phase",
+    colorscale: [[0,"#6A5ACD"],[1,"#6A5ACD"]],
+    showscale: false,
+    marker: {line:{color:"white",width:0.4}},
+    hovertemplate: "<b>%{text}</b><br>Status: Design Phase<extra></extra>"
+},
 
-    /* ---------------- Research / Exploratory ---------------- */
-    {
-        type: "choropleth",
-        locationmode: "ISO-3",
-        locations: ["JPN","MEX","USA"],
-        z: [1,1,1],
-        text: ["Japan","Mexico","United States"],
-        name: "Research / Exploratory",
-        colorscale: [[0,"#9B2C2C"],[1,"#9B2C2C"]],
-        showscale: false,
-        marker: {line: {color: "white", width: 0.4}},
-        hovertemplate: "<b>%{text}</b><br>Status: Research / Exploratory<extra></extra>"
-    },
+/* Research / Exploratory */
+{
+    type: "choropleth",
+    locationmode: "ISO-3",
+    locations: ["JPN","MEX","USA"],
+    z: [1,1,1],
+    text: ["Japan","Mexico","United States"],
+    name: "Research / Exploratory",
+    colorscale: [[0,"#9B2C2C"],[1,"#9B2C2C"]],
+    showscale: false,
+    marker: {line:{color:"white",width:0.4}},
+    hovertemplate: "<b>%{text}</b><br>Status: Research / Exploratory<extra></extra>"
+},
 
-    /* ---------------- Cancelled ---------------- */
-    {
-        type: "choropleth",
-        locationmode: "ISO-3",
-        locations: ["ECU","URY"],
-        z: [1,1],
-        text: ["Ecuador","Uruguay"],
-        name: "Cancelled",
-        colorscale: [[0,"#7A7A7A"],[1,"#7A7A7A"]],
-        showscale: false,
-        marker: {line: {color: "white", width: 0.4}},
-        hovertemplate: "<b>%{text}</b><br>Status: Cancelled<extra></extra>"
-    }
+/* Cancelled */
+{
+    type: "choropleth",
+    locationmode: "ISO-3",
+    locations: ["ECU","URY"],
+    z: [1,1],
+    text: ["Ecuador","Uruguay"],
+    name: "Cancelled",
+    colorscale: [[0,"#7A7A7A"],[1,"#7A7A7A"]],
+    showscale: false,
+    marker: {line:{color:"white",width:0.4}},
+    hovertemplate: "<b>%{text}</b><br>Status: Cancelled<extra></extra>"
+}
+
 ];
 
-/* ======================================================
-   LAYOUT
-   ====================================================== */
+/* =========================
+   LAYOUT (LEYENDA FIJA)
+   ========================= */
 
 var layout = {
     title: {
         text: "CBDC Status (Selected Jurisdictions)",
         x: 0.5,
-        xanchor: "center",
         font: {size: 20}
     },
     geo: {
@@ -161,26 +156,22 @@ var layout = {
     },
     legend: {
         title: {text: "Status"},
-        bgcolor: "rgba(255,255,255,0.85)",
-        bordercolor: "rgba(0,0,0,0.15)",
-        borderwidth: 1,
+        orientation: "v",
         x: 0.02,
         y: 0.02,
         xanchor: "left",
-        yanchor: "bottom"
+        yanchor: "bottom",
+        bgcolor: "rgba(255,255,255,0.9)",
+        bordercolor: "rgba(0,0,0,0.2)",
+        borderwidth: 1
     },
-    margin: {l: 10, r: 10, t: 60, b: 10},
+    margin: {l:10,r:10,t:60,b:10},
     paper_bgcolor: "white"
 };
 
-/* ======================================================
-   RENDER
-   ====================================================== */
-
-Plotly.newPlot("cbdc-map", data, layout, {responsive: true});
+Plotly.newPlot("cbdc-map", data, layout, {responsive:true});
 
 </script>
 
 </body>
 </html>
-
