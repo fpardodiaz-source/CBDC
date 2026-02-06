@@ -1,248 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <title>CBDC Status – Interactive Choropleth Map</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8"/>
+  <title>CBDC Status – Interactive Choropleth Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.plot.ly/plotly-2.4.1.min.js"></script>
 
-    <!-- Plotly CDN -->
-    <script src="https://cdn.plot.ly/plotly-2.4.1.min.js"></script>
-
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #ffffff;
-        }
-        #cbdc-map {
-            width: 100vw;
-            height: 95vh;
-        }
-        footer {
-            text-align: center;
-            font-size: 12px;
-            color: #555;
-            padding: 6px;
-        }
-    </style>
+  <style>
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; }
+    #cbdc-map { width: 100vw; height: 95vh; }
+    footer { text-align: center; font-size: 12px; color: #555; padding: 6px; }
+  </style>
 </head>
 
 <body>
+  <div id="cbdc-map"></div>
+  <footer>Source: own elaboration based on official central bank publications.</footer>
 
-<div id="cbdc-map"></div>
+  <script>
+    // ------- Helper
+    function ones(n){ return Array.from({length:n}, () => 1); }
 
-<footer>
-    Source: own elaboration based on official central bank publications.
-</footer>
+    // ------- Traces (choropleth) — these MUST carry the legend
+    var traces = [
 
-<script type="text/javascript">
+      // Publicly launched
+      {
+        type: "choropleth",
+        name: "Publicly launched",
+        legendgroup: "Publicly launched",
+        showlegend: true,
+        locationmode: "ISO-3",
+        locations: ["BHS","JAM","NGA"],
+        z: [1,1,1],
+        text: ["Bahamas","Jamaica","Nigeria"],
+        colorscale: [[0,"#2F855A"],[1,"#2F855A"]],
+        showscale: false,
+        marker: { line: { color: "white", width: 0.4 } },
+        hovertemplate: "<b>%{text}</b><br>Status: Publicly launched<extra></extra>"
+      },
 
-/* ======================================================
-   CHOROPLETH DATA (NO LEGEND HERE)
-   ====================================================== */
+      // Pilot
+      {
+        type: "choropleth",
+        name: "Pilot",
+        legendgroup: "Pilot",
+        showlegend: true,
+        locationmode: "ISO-3",
+        locations: ["AUS","BRA","CHN","GHA","HKG","IND","KAZ","RUS","SWE","TUR"],
+        z: ones(10),
+        text: ["Australia","Brazil","China","Ghana","Hong Kong","India","Kazakhstan","Russia","Sweden","Türkiye"],
+        colorscale: [[0,"#D69E2E"],[1,"#D69E2E"]],
+        showscale: false,
+        marker: { line: { color: "white", width: 0.4 } },
+        hovertemplate: "<b>%{text}</b><br>Status: Pilot<extra></extra>"
+      },
 
-var data = [
+      // Development (Euro area + others)
+      {
+        type: "choropleth",
+        name: "Development",
+        legendgroup: "Development",
+        showlegend: true,
+        locationmode: "ISO-3",
+        locations: [
+          "AUT","BEL","HRV","CYP","EST","FIN","FRA","DEU","GRC","IRL",
+          "ITA","LVA","LTU","LUX","MLT","NLD","PRT","SVK","SVN","ESP",
+          "CAN","ARE"
+        ],
+        z: ones(22),
+        text: [
+          "Austria","Belgium","Croatia","Cyprus","Estonia","Finland","France","Germany","Greece","Ireland",
+          "Italy","Latvia","Lithuania","Luxembourg","Malta","Netherlands","Portugal","Slovakia","Slovenia","Spain",
+          "Canada","United Arab Emirates"
+        ],
+        colorscale: [[0,"#2B6CB0"],[1,"#2B6CB0"]],
+        showscale: false,
+        marker: { line: { color: "white", width: 0.4 } },
+        hovertemplate: "<b>%{text}</b><br>Status: Development<extra></extra>"
+      },
 
-/* ---------- Publicly launched ---------- */
-{
-    type: "choropleth",
-    locationmode: "ISO-3",
-    locations: ["BHS","JAM","NGA"],
-    z: [1,1,1],
-    text: ["Bahamas","Jamaica","Nigeria"],
-    colorscale: [[0,"#2F855A"],[1,"#2F855A"]],
-    showscale: false,
-    showlegend: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Publicly launched<extra></extra>"
-},
+      // Design Phase
+      {
+        type: "choropleth",
+        name: "Design Phase",
+        legendgroup: "Design Phase",
+        showlegend: true,
+        locationmode: "ISO-3",
+        locations: ["GBR"],
+        z: [1],
+        text: ["United Kingdom"],
+        colorscale: [[0,"#6A5ACD"],[1,"#6A5ACD"]],
+        showscale: false,
+        marker: { line: { color: "white", width: 0.4 } },
+        hovertemplate: "<b>%{text}</b><br>Status: Design Phase<extra></extra>"
+      },
 
-/* ---------- Pilot ---------- */
-{
-    type: "choropleth",
-    locationmode: "ISO-3",
-    locations: ["AUS","BRA","CHN","GHA","HKG","IND","KAZ","RUS","SWE","TUR"],
-    z: Array(10).fill(1),
-    text: ["Australia","Brazil","China","Ghana","Hong Kong","India","Kazakhstan","Russia","Sweden","Türkiye"],
-    colorscale: [[0,"#D69E2E"],[1,"#D69E2E"]],
-    showscale: false,
-    showlegend: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Pilot<extra></extra>"
-},
+      // Research / Exploratory
+      {
+        type: "choropleth",
+        name: "Research / Exploratory",
+        legendgroup: "Research / Exploratory",
+        showlegend: true,
+        locationmode: "ISO-3",
+        locations: ["JPN","MEX","USA"],
+        z: [1,1,1],
+        text: ["Japan","Mexico","United States"],
+        colorscale: [[0,"#9B2C2C"],[1,"#9B2C2C"]],
+        showscale: false,
+        marker: { line: { color: "white", width: 0.4 } },
+        hovertemplate: "<b>%{text}</b><br>Status: Research / Exploratory<extra></extra>"
+      },
 
-/* ---------- Development (Euro area + others) ---------- */
-{
-    type: "choropleth",
-    locationmode: "ISO-3",
-    locations: [
-        "AUT","BEL","HRV","CYP","EST","FIN","FRA","DEU","GRC","IRL",
-        "ITA","LVA","LTU","LUX","MLT","NLD","PRT","SVK","SVN","ESP",
-        "CAN","ARE"
-    ],
-    z: Array(22).fill(1),
-    text: [
-        "Austria","Belgium","Croatia","Cyprus","Estonia","Finland","France","Germany","Greece","Ireland",
-        "Italy","Latvia","Lithuania","Luxembourg","Malta","Netherlands","Portugal","Slovakia","Slovenia","Spain",
-        "Canada","United Arab Emirates"
-    ],
-    colorscale: [[0,"#2B6CB0"],[1,"#2B6CB0"]],
-    showscale: false,
-    showlegend: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Development<extra></extra>"
-},
+      // Cancelled
+      {
+        type: "choropleth",
+        name: "Cancelled",
+        legendgroup: "Cancelled",
+        showlegend: true,
+        locationmode: "ISO-3",
+        locations: ["ECU","URY"],
+        z: [1,1],
+        text: ["Ecuador","Uruguay"],
+        colorscale: [[0,"#7A7A7A"],[1,"#7A7A7A"]],
+        showscale: false,
+        marker: { line: { color: "white", width: 0.4 } },
+        hovertemplate: "<b>%{text}</b><br>Status: Cancelled<extra></extra>"
+      }
+    ];
 
-/* ---------- Design Phase ---------- */
-{
-    type: "choropleth",
-    locationmode: "ISO-3",
-    locations: ["GBR"],
-    z: [1],
-    text: ["United Kingdom"],
-    colorscale: [[0,"#6A5ACD"],[1,"#6A5ACD"]],
-    showscale: false,
-    showlegend: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Design Phase<extra></extra>"
-},
-
-/* ---------- Research / Exploratory ---------- */
-{
-    type: "choropleth",
-    locationmode: "ISO-3",
-    locations: ["JPN","MEX","USA"],
-    z: [1,1,1],
-    text: ["Japan","Mexico","United States"],
-    colorscale: [[0,"#9B2C2C"],[1,"#9B2C2C"]],
-    showscale: false,
-    showlegend: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Research / Exploratory<extra></extra>"
-},
-
-/* ---------- Cancelled ---------- */
-{
-    type: "choropleth",
-    locationmode: "ISO-3",
-    locations: ["ECU","URY"],
-    z: [1,1],
-    text: ["Ecuador","Uruguay"],
-    colorscale: [[0,"#7A7A7A"],[1,"#7A7A7A"]],
-    showscale: false,
-    showlegend: false,
-    marker: {line:{color:"white",width:0.4}},
-    hovertemplate: "<b>%{text}</b><br>Status: Cancelled<extra></extra>"
-},
-
-/* ======================================================
-   LEGEND-ONLY TRACES (ROBUST FIX)
-   ====================================================== */
-{
-    type: "scattergeo",
-    mode: "markers",
-    name: "Publicly launched",
-    lon: [0], lat: [0],
-    marker: {size: 12, color: "#2F855A"},
-    hoverinfo: "skip",
-    visible: "legendonly",
-    showlegend: true
-},
-{
-    type: "scattergeo",
-    mode: "markers",
-    name: "Pilot",
-    lon: [0], lat: [0],
-    marker: {size: 12, color: "#D69E2E"},
-    hoverinfo: "skip",
-    visible: "legendonly",
-    showlegend: true
-},
-{
-    type: "scattergeo",
-    mode: "markers",
-    name: "Development",
-    lon: [0], lat: [0],
-    marker: {size: 12, color: "#2B6CB0"},
-    hoverinfo: "skip",
-    visible: "legendonly",
-    showlegend: true
-},
-{
-    type: "scattergeo",
-    mode: "markers",
-    name: "Design Phase",
-    lon: [0], lat: [0],
-    marker: {size: 12, color: "#6A5ACD"},
-    hoverinfo: "skip",
-    visible: "legendonly",
-    showlegend: true
-},
-{
-    type: "scattergeo",
-    mode: "markers",
-    name: "Research / Exploratory",
-    lon: [0], lat: [0],
-    marker: {size: 12, color: "#9B2C2C"},
-    hoverinfo: "skip",
-    visible: "legendonly",
-    showlegend: true
-},
-{
-    type: "scattergeo",
-    mode: "markers",
-    name: "Cancelled",
-    lon: [0], lat: [0],
-    marker: {size: 12, color: "#7A7A7A"},
-    hoverinfo: "skip",
-    visible: "legendonly",
-    showlegend: true
-}
-
-];
-
-/* ======================================================
-   LAYOUT
-   ====================================================== */
-
-var layout = {
-    title: {
-        text: "CBDC Status (Selected Jurisdictions)",
-        x: 0.5,
-        font: {size: 20}
-    },
-    geo: {
-        projection: {type: "natural earth"},
+    var layout = {
+      title: { text: "CBDC Status (Selected Jurisdictions)", x: 0.5, font: { size: 20 } },
+      geo: {
+        projection: { type: "natural earth" },
         showframe: false,
         showcountries: true,
         countrycolor: "rgba(0,0,0,0.25)",
         showcoastlines: true,
         coastlinecolor: "rgba(0,0,0,0.25)",
         bgcolor: "white"
-    },
-    legend: {
-        title: {text: "Status"},
+      },
+      legend: {
+        title: { text: "Status (click to filter)" },
         orientation: "v",
-        x: 0.02,
-        y: 0.02,
-        xanchor: "left",
-        yanchor: "bottom",
+        x: 0.02, y: 0.02,
+        xanchor: "left", yanchor: "bottom",
         bgcolor: "rgba(255,255,255,0.95)",
         bordercolor: "rgba(0,0,0,0.25)",
         borderwidth: 1
-    },
-    margin: {l:10, r:10, t:60, b:10},
-    paper_bgcolor: "white",
-    showlegend: true
-};
+      },
+      margin: { l: 10, r: 10, t: 60, b: 10 },
+      paper_bgcolor: "white",
+      showlegend: true
+    };
 
-/* ======================================================
-   RENDER
-   ====================================================== */
-
-Plotly.newPlot("cbdc-map", data, layout, {responsive:true});
-
-</script>
-
+    Plotly.newPlot("cbdc-map", traces, layout, { responsive: true });
+  </script>
 </body>
 </html>
