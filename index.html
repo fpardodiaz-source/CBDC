@@ -1,160 +1,283 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <title>CBDC Status – Interactive Choropleth Map</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <script src="https://cdn.plot.ly/plotly-2.4.1.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Estatus CBDC</title>
 
-  <style>
-    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #fff; }
-    #cbdc-map { width: 100vw; height: 95vh; }
-    footer { text-align: center; font-size: 12px; color: #555; padding: 6px; }
-  </style>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f5f7fb;
+  overflow: hidden;
+}
+
+.stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===============================
+   OVERLAY TRANSPARENTE
+================================ */
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 30px 20px 45px;
+  text-align: center;
+  z-index: 10;
+  color: white;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+.overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.65) 0%,
+    rgba(0,0,0,0.35) 45%,
+    rgba(0,0,0,0.0) 100%
+  );
+  z-index: -1;
+}
+
+.overlay h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.overlay .subtitle {
+  margin-top: 10px;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.overlay a {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+.overlay.hidden {
+  opacity: 0;
+  transform: translateY(-25px);
+}
+
+/* ===============================
+   LEYENDA ELEGANTE
+================================ */
+
+.legend {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 28px;
+  padding: 14px 26px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(6px);
+  border-radius: 40px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.legend .color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+/* Colores alineados con Viridis */
+
+.c-cancelado { background: #440154; }
+.c-investigacion { background: #3b528b; }
+.c-desarrollo { background: #21918c; }
+.c-piloto { background: #5ec962; }
+.c-circulacion { background: #fde725; }
+
+</style>
 </head>
 
 <body>
-  <div id="cbdc-map"></div>
-  <footer>Source: own elaboration based on official central bank publications.</footer>
+<div class="stage">
 
-  <script>
-    // ------- Helper
-    function ones(n){ return Array.from({length:n}, () => 1); }
+  <div class="overlay">
+    <h1>Estatus CBDC</h1>
+    <div class="subtitle">
+      Fuente: elaboración propia con información de los bancos centrales.<br>
+      Contacto: <a href="mailto:fpardo02@ucm.es">fpardo02@ucm.es</a>
+    </div>
+  </div>
 
-    // ------- Traces (choropleth) — these MUST carry the legend
-    var traces = [
+  <div id="map"></div>
 
-      // Publicly launched
-      {
-        type: "choropleth",
-        name: "Publicly launched",
-        legendgroup: "Publicly launched",
-        showlegend: true,
-        locationmode: "ISO-3",
-        locations: ["BHS","JAM","NGA"],
-        z: [1,1,1],
-        text: ["Bahamas","Jamaica","Nigeria"],
-        colorscale: [[0,"#2F855A"],[1,"#2F855A"]],
-        showscale: false,
-        marker: { line: { color: "white", width: 0.4 } },
-        hovertemplate: "<b>%{text}</b><br>Status: Publicly launched<extra></extra>"
-      },
+  <div class="legend">
+    <div class="legend-item">
+      <span class="color c-cancelado"></span> Cancelado
+    </div>
+    <div class="legend-item">
+      <span class="color c-investigacion"></span> Investigación
+    </div>
+    <div class="legend-item">
+      <span class="color c-desarrollo"></span> Desarrollo
+    </div>
+    <div class="legend-item">
+      <span class="color c-piloto"></span> Piloto
+    </div>
+    <div class="legend-item">
+      <span class="color c-circulacion"></span> Circulación
+    </div>
+  </div>
 
-      // Pilot
-      {
-        type: "choropleth",
-        name: "Pilot",
-        legendgroup: "Pilot",
-        showlegend: true,
-        locationmode: "ISO-3",
-        locations: ["AUS","BRA","CHN","GHA","HKG","IND","KAZ","RUS","SWE","TUR"],
-        z: ones(10),
-        text: ["Australia","Brazil","China","Ghana","Hong Kong","India","Kazakhstan","Russia","Sweden","Türkiye"],
-        colorscale: [[0,"#D69E2E"],[1,"#D69E2E"]],
-        showscale: false,
-        marker: { line: { color: "white", width: 0.4 } },
-        hovertemplate: "<b>%{text}</b><br>Status: Pilot<extra></extra>"
-      },
+</div>
 
-      // Development (Euro area + others)
-      {
-        type: "choropleth",
-        name: "Development",
-        legendgroup: "Development",
-        showlegend: true,
-        locationmode: "ISO-3",
-        locations: [
-          "AUT","BEL","HRV","CYP","EST","FIN","FRA","DEU","GRC","IRL",
-          "ITA","LVA","LTU","LUX","MLT","NLD","PRT","SVK","SVN","ESP",
-          "CAN","ARE"
-        ],
-        z: ones(22),
-        text: [
-          "Austria","Belgium","Croatia","Cyprus","Estonia","Finland","France","Germany","Greece","Ireland",
-          "Italy","Latvia","Lithuania","Luxembourg","Malta","Netherlands","Portugal","Slovakia","Slovenia","Spain",
-          "Canada","United Arab Emirates"
-        ],
-        colorscale: [[0,"#2B6CB0"],[1,"#2B6CB0"]],
-        showscale: false,
-        marker: { line: { color: "white", width: 0.4 } },
-        hovertemplate: "<b>%{text}</b><br>Status: Development<extra></extra>"
-      },
+<script>
 
-      // Design Phase
-      {
-        type: "choropleth",
-        name: "Design Phase",
-        legendgroup: "Design Phase",
-        showlegend: true,
-        locationmode: "ISO-3",
-        locations: ["GBR"],
-        z: [1],
-        text: ["United Kingdom"],
-        colorscale: [[0,"#6A5ACD"],[1,"#6A5ACD"]],
-        showscale: false,
-        marker: { line: { color: "white", width: 0.4 } },
-        hovertemplate: "<b>%{text}</b><br>Status: Design Phase<extra></extra>"
-      },
+// =============================
+// DATOS
+// =============================
 
-      // Research / Exploratory
-      {
-        type: "choropleth",
-        name: "Research / Exploratory",
-        legendgroup: "Research / Exploratory",
-        showlegend: true,
-        locationmode: "ISO-3",
-        locations: ["JPN","MEX","USA"],
-        z: [1,1,1],
-        text: ["Japan","Mexico","United States"],
-        colorscale: [[0,"#9B2C2C"],[1,"#9B2C2C"]],
-        showscale: false,
-        marker: { line: { color: "white", width: 0.4 } },
-        hovertemplate: "<b>%{text}</b><br>Status: Research / Exploratory<extra></extra>"
-      },
+const rows = [
+  { iso3:"CHN", pais:"China", emisor:"People's Bank of China", moneda:"e-CNY", tipo:"Minorista", estado:"Piloto", fase:"Piloto ampliado", fecha:"2020–", obj1:"Digitalización del sistema de pagos", obj2:"Eficiencia y trazabilidad", enlace:"http://www.pbc.gov.cn" },
+  { iso3:"NGA", pais:"Nigeria", emisor:"Central Bank of Nigeria", moneda:"eNaira", tipo:"Minorista", estado:"Circulación", fase:"Implementación plena", fecha:"2021", obj1:"Inclusión financiera", obj2:"Pagos digitales", enlace:"https://www.cbn.gov.ng" },
+  { iso3:"USA", pais:"Estados Unidos", emisor:"Federal Reserve", moneda:"Dólar digital", tipo:"Investigación", estado:"Investigación", fase:"Desarrollo", fecha:"2021", obj1:"Investigación técnica", obj2:"Análisis regulatorio", enlace:"https://www.federalreserve.gov" },
+  { iso3:"BRA", pais:"Brasil", emisor:"Banco Central do Brasil", moneda:"Drex", tipo:"Mayorista", estado:"Piloto", fase:"Mayorista ampliado", fecha:"2023", obj1:"Tokenización financiera", obj2:"Infraestructura pagos", enlace:"https://www.bcb.gov.br" },
+  { iso3:"ECU", pais:"Ecuador", emisor:"Banco Central del Ecuador", moneda:"Dinero Electrónico", tipo:"Minorista", estado:"Cancelado", fase:"—", fecha:"2018", obj1:"Inclusión financiera", obj2:"Pagos electrónicos", enlace:"https://www.bce.fin.ec" }
+];
 
-      // Cancelled
-      {
-        type: "choropleth",
-        name: "Cancelled",
-        legendgroup: "Cancelled",
-        showlegend: true,
-        locationmode: "ISO-3",
-        locations: ["ECU","URY"],
-        z: [1,1],
-        text: ["Ecuador","Uruguay"],
-        colorscale: [[0,"#7A7A7A"],[1,"#7A7A7A"]],
-        showscale: false,
-        marker: { line: { color: "white", width: 0.4 } },
-        hovertemplate: "<b>%{text}</b><br>Status: Cancelled<extra></extra>"
-      }
-    ];
+// =============================
+// Escala Estado
+// =============================
 
-    var layout = {
-      title: { text: "CBDC Status (Selected Jurisdictions)", x: 0.5, font: { size: 20 } },
-      geo: {
-        projection: { type: "natural earth" },
-        showframe: false,
-        showcountries: true,
-        countrycolor: "rgba(0,0,0,0.25)",
-        showcoastlines: true,
-        coastlinecolor: "rgba(0,0,0,0.25)",
-        bgcolor: "white"
-      },
-      legend: {
-        title: { text: "Status (click to filter)" },
-        orientation: "v",
-        x: 0.02, y: 0.02,
-        xanchor: "left", yanchor: "bottom",
-        bgcolor: "rgba(255,255,255,0.95)",
-        bordercolor: "rgba(0,0,0,0.25)",
-        borderwidth: 1
-      },
-      margin: { l: 10, r: 10, t: 60, b: 10 },
-      paper_bgcolor: "white",
-      showlegend: true
-    };
+const estadoScale = {
+  "Cancelado": -1,
+  "Investigación": 0,
+  "Desarrollo": 1,
+  "Piloto": 2,
+  "Circulación": 3
+};
 
-    Plotly.newPlot("cbdc-map", traces, layout, { responsive: true });
-  </script>
+// =============================
+// Preparar datos
+// =============================
+
+const locations = [];
+const z = [];
+const hover = [];
+
+rows.forEach(r => {
+  locations.push(r.iso3);
+  z.push(estadoScale[r.estado]);
+  hover.push(
+`<b>${r.pais}</b><br>
+Emisor: ${r.emisor}<br>
+Moneda digital: ${r.moneda}<br>
+Tipo: ${r.tipo}<br>
+Estado: ${r.estado}<br>
+Fase: ${r.fase}<br>
+Fecha: ${r.fecha}<br>
+Objetivo principal: ${r.obj1}<br>
+Objetivo secundario: ${r.obj2}<br>
+Enlace: ${r.enlace}`
+  );
+});
+
+// =============================
+// Plot
+// =============================
+
+const data = [{
+  type: "choropleth",
+  locationmode: "ISO-3",
+  locations: locations,
+  z: z,
+  text: hover,
+  hovertemplate: "%{text}<extra></extra>",
+  colorscale: "Viridis",
+  showscale: false,
+  marker: { line: { color: "white", width: 0.5 } }
+}];
+
+const layout = {
+  geo: {
+    projection: { type: "natural earth" },
+    showframe: false,
+    showcoastlines: true,
+    coastlinecolor: "#999",
+    showocean: true,
+    oceancolor: "#e3e7f0"
+  },
+  margin: { t: 0, b: 0, l: 0, r: 0 },
+  paper_bgcolor: "rgba(0,0,0,0)"
+};
+
+Plotly.newPlot("map", data, layout, { responsive:true });
+
+// =============================
+// Click abre enlace
+// =============================
+
+const mapDiv = document.getElementById("map");
+
+mapDiv.on('plotly_click', function(data) {
+  const iso = data.points[0].location;
+  const row = rows.find(r => r.iso3 === iso);
+  if (row?.enlace) window.open(row.enlace, "_blank");
+});
+
+// =============================
+// Auto-hide overlay
+// =============================
+
+const overlay = document.querySelector(".overlay");
+
+function hideOverlay() {
+  overlay.classList.add("hidden");
+}
+
+function showOverlay() {
+  overlay.classList.remove("hidden");
+}
+
+mapDiv.on('plotly_relayout', hideOverlay);
+mapDiv.on('plotly_click', hideOverlay);
+
+document.addEventListener("mousemove", (e) => {
+  if (e.clientY < 90) showOverlay();
+});
+
+</script>
 </body>
 </html>
